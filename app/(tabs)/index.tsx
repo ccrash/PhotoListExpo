@@ -1,98 +1,113 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useCallback, useMemo } from 'react'
+import { ActivityIndicator, RefreshControl, Text, View, FlatList, StyleSheet } from 'react-native'
+import PhotoItem from '../../components/PhotoItem'
+import { useStoreDispatch, useStoreSelector } from '../../hooks/store'
+import {
+  loadNextPage,
+  resetPhotos,
+  photosSelectors,
+  selectPage,
+  selectIsLoading,
+  selectIsFetchingMore,
+  selectHasMore
+} from '../../store/photosSlice'
+import { useTheme } from '../../theme/ThemeProvider'
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const AllPhotosScreen = () => {
+  const dispatch = useStoreDispatch() as unknown as (action: any) => any
 
-export default function HomeScreen() {
+  const items = useStoreSelector((state: any) => photosSelectors.selectAll(state))
+  const page = useStoreSelector((state: any) => selectPage(state))
+  const isLoading = useStoreSelector((state: any) => selectIsLoading(state))
+  const isFetchingMore = useStoreSelector((state: any) => selectIsFetchingMore(state))
+  const hasMore = useStoreSelector((state: any) => selectHasMore(state))
+
+  const theme = useTheme()
+  const styles = useMemo(() => makeStyles(theme), [theme])
+
+  useEffect(() => {
+    if (page === 0 && !isLoading) {
+      dispatch(loadNextPage() as any)
+    }
+  }, [dispatch, page, isLoading])
+
+  const onEndReached = useCallback(() => {
+    if (isLoading || isFetchingMore || !hasMore) return
+    dispatch(loadNextPage() as any)
+  }, [dispatch, isLoading, isFetchingMore, hasMore])
+
+  const onRefresh = useCallback(() => {
+    dispatch(resetPhotos() as any)
+    dispatch(loadNextPage() as any)
+  }, [dispatch])
+
+  const renderItem = useCallback(
+    ({ item }: { item: typeof items[number] }) => <PhotoItem photo={item} />,
+    []
+  )
+
+  const renderListFooterComponent = () => {
+    if (isFetchingMore && hasMore) {
+      return (
+        <View style={styles.footer}>
+          <ActivityIndicator color={theme.colors.primary} />
+        </View>
+      )
+    }
+    return null
+  }
+
+  const renderListEmptyComponent = () => {
+    if (isLoading && page === 0) {
+      return (
+        <View style={styles.center}>
+          <ActivityIndicator color={theme.colors.primary} />
+        </View>
+      )
+    }
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>No photos yet</Text>
+      </View>
+    )
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+      <FlatList
+        data={items}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.2}
+        ListFooterComponent={renderListFooterComponent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading && page === 0}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}                 // iOS spinner color
+            colors={[theme.colors.primary]}                  // Android spinner color(s)
+            progressBackgroundColor={theme.colors.card}      // Android track
+          />
+        }
+        removeClippedSubviews
+        initialNumToRender={8}
+        windowSize={7}
+        maxToRenderPerBatch={8}
+        updateCellsBatchingPeriod={16}
+        maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+        contentContainerStyle={styles.content}
+        ListEmptyComponent={renderListEmptyComponent}
+      />
+  )
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.colors.bg },
+    content: { paddingBottom: 0 },
+    footer: { padding: 4 },
+    center: { padding: 24, alignItems: 'center' },
+    emptyText: { color: t.colors.muted }
+  })
+
+export default AllPhotosScreen

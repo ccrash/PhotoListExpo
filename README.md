@@ -1,50 +1,53 @@
-# Welcome to your Expo app 👋
+# Photo List Expo
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+PhotoListExpo is the porting on Expo of PhotoList (https://github.com/ccrash/PhotoList), a mobile application built with React and Redux that displays a dynamic list of photos.
+It allows users to like photos, with their favorites stored persistently using AsyncStorage.
+The app also includes a theme switching feature, enabling users to toggle between light and dark modes for a personalized experience.
 
-## Get started
+![plot](./assets/ios_recording.gif)
 
-1. Install dependencies
+# Features:
 
-   ```bash
-   npm install
-   ```
+* Cross-platform parity: smooth, consistent UI and behavior on both Android and iOS
 
-2. Start the app
+* Photo feed (Picsum API): paginated fetch (page, limit, default 8) with HTTP error handling.
 
-   ```bash
-   npx expo start
-   ```
+* Bottom tabs: “Photos” and “Liked” screens with custom SVG tab icons.
 
-In the output, you'll find options to open the app in a
+* Theming: light/dark theme tokens, synced with the OS (via Appearance) + a header theme switch; themed NavigationContainer and status bar.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* Photo cards: full-width images with responsive height (calcImageHeight), author caption, and an ActivityIndicator until the image loads.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* Like / Unlike: heart button with visual state (fill color), Android ripple, and accessibility (role, label, selected state).
 
-## Get a fresh project
+* Favorites screen: lists the photos you’ve liked.
 
-When you're ready, run:
+* State management: Redux store with slice selectors/actions (toggleLike, selectIsLiked) and redux-persist so likes survive app restarts.
+
+* Accessibility basics: labels for images and controls; uses accessibility state and roles.
+
+* Performance touches: memoized styles and computations (useMemo, memo), per-item selector to avoid excess renders.
+
+## Installation
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/)
+- [Yarn](https://yarnpkg.com/)
+- [Expo Go](https://expo.dev/client) app on iOS or Android
+
+### Steps
+
+**Install dependecies:**
 
 ```bash
-npm run reset-project
+yarn install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Run the project locally**
 
-## Learn more
+```bash
+yarn start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Scan the QR code displayed in the terminal or browser with Expo Go to launch the app.

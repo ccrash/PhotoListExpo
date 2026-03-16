@@ -2,32 +2,39 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@theme/ThemeProvider';
+import HeaderTitle from '@components/header/Title';
+import HeaderThemeSwitch from '@components/header/ThemeSwitch';
+
+import Images from '@assets/images.svg'
+import Heart from '@assets/heart_fill.svg'
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const theme = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.muted,
+        tabBarStyle: { backgroundColor: theme.colors.card, borderTopColor: theme.colors.border },
         tabBarButton: HapticTab,
+        headerStyle: { backgroundColor: theme.colors.card },
+        headerTitle: () => <HeaderTitle />,
+        headerRight: () => <HeaderThemeSwitch />,
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Photos',
+          tabBarIcon: ({ color }) => <Images width={24} height={24} fill={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="likedPhotos"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Favorites',
+          tabBarIcon: ({ color }) => <Heart width={24} height={24} fill={color} />,
         }}
       />
     </Tabs>
