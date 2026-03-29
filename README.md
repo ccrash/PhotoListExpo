@@ -51,3 +51,10 @@ yarn start
 ```
 
 Scan the QR code displayed in the terminal or browser with Expo Go to launch the app.
+
+## License
+
+This project is licensed under a custom non-commercial license.
+
+❗ Commercial use is prohibited  
+❗ Use in AI/ML systems is strictly prohibited without permission
